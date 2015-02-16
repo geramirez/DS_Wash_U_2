@@ -80,3 +80,7 @@ ind.dist <- outer(first.d, second.d)
 err = (ind.dist - joint.table)/ ind.dist
 # average rel. error
 sum(abs(err))/5
+
+
+
+

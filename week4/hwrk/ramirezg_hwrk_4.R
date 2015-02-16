@@ -66,3 +66,31 @@ prob.matrix <- matrix(data = c(fav.team.wins + unfav.team.looses,
 
 chisq.test(prob.matrix, correct = F)
 
+
+### 4
+
+# I suspect that teams that have been around for longer perform better than 
+# newer teams. 
+
+# My null hypothsis is that the number of years that a team has been playing does not affect
+# it's win-loss record
+
+# Data from NCAA.R script
+# Make years playing variable
+outcomes$years_playing <- as.numeric(as.character(outcomes$To)) - as.numeric(as.character(outcomes$From)) 
+# Clean data by removing NAs and teams that are no longer playing and isolating test variables
+outcomes.cleans <- outcomes[ as.character(outcomes$To) == "2015", c("W-L%", "years_playing")]
+outcomes.cleans[["W-L%"]] <- as.numeric(as.character(outcomes.cleans[["W-L%"]]))
+# split 2 attributes into 4 groups in order to run chi-squared test
+
+outcomes.cleans$split_years <- cut(x = outcomes.cleans$years_playing, 
+                                   breaks = quantile(outcomes.cleans$years_playing, probs = c(0,.25, .50, .75, 1)))
+outcomes.cleans$split_win_pct <- cut(x = outcomes.cleans[["W-L%"]], 
+                                     breaks = quantile(outcomes.cleans[["W-L%"]], probs = c(0, .25, .50, .75, 1)))
+#putting into table
+yearsvswinptc <- table(outcomes.cleans$split_years, outcomes.cleans$split_win_pct )
+
+chisq.test(yearsvswinptc)
+# With a p-value of 2.2e-16 we reject the null hypothsis that years playing do no not affect a team's
+# win-loss record. 
+# do no perform better 

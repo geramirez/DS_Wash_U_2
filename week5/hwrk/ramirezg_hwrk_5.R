@@ -14,7 +14,6 @@ data <- read.csv("day.csv", stringsAsFactors=FALSE)
 # Transform into POSIXct
 data$dteday <- strptime(x = data$dteday, format = "%Y-%m-%d")
 data$wday <- weekdays(data$dteday)
-data$workingday
 
 # 2.  Gather the total number of riders in each category and for each day of the week 
 # into a contingency table. Are rider category and day of week independent (use a hypothesis test)?
@@ -41,18 +40,22 @@ ks.test(con.table$registered, con.table$casual)
 # Making data nicer to look at (would not do if dataset was very large)
 data$workingday <- with(data, ifelse(test = workingday == 1, yes = "weekday", no = "weekend"))
 data$both <- with(data = data, expr = casual + registered)
-con.table.workingday <- aggregate(x = data$both, 
-                       by=list(data$workingday), 
-                       FUN=mean, na.rm=TRUE)
+# Running T-test
+t.test(data[data$workingday == "weekday", c('both')],
+       data[data$workingday == "weekend", c('both')],
+       alternative = 'greater')
 
-# Chi-sqared test
-rand <- sum(con.table.workingday$x)
-con.table.workingday <- cbind(con.table.workingday, rand/2)
-chisq.test(con.table.workingday[,2:3])
+set.seed(100)
+u <- mean(data[data$workingday == "weekend", c('both')])
+sd <- sd(data[data$workingday == "weekend", c('both')])
+num <- length(data[data$workingday == "weekend", c('both')])
+weekend.dist <- rnorm(n = num, mean = u, sd = sd)
+ks.test(weekend.dist, data[data$workingday == "weekend", c('both')])
 
-# With a p-value of 2.2e-16 we reject the null hypothsis that the total number of riders 
-# remains constant between weekdays and weekend
 
-# 5. Is it reasonable to apply a t-test in answering question 4? 
-t.test(x = data[data$workingday == "weekend" ,"both"],
-       y = data[data$workingday == "weekday" ,"both"])
+u <- mean(data[data$workingday == "weekend", c('both')])
+sd <- sd(data[data$workingday == "weekend", c('both')])
+num <- length(data[data$workingday == "weekend", c('both')])
+weekend.dist <- rnorm(n = num, mean = u, sd = sd)
+ks.test(weekend.dist, data[data$workingday == "weekend", c('both')])
+
